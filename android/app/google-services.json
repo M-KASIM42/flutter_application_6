@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "954983573437",
+    "project_id": "fish-project-aff4e",
+    "storage_bucket": "fish-project-aff4e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:954983573437:android:71cb7d4259605ce41014d4",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_6"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUOtMUa5GJPp2h-rPCArO98z9D3Zl89cI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

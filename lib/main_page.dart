@@ -1,0 +1,188 @@
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_6/add_page.dart';
+import 'package:flutter_application_6/post_page.dart';
+import 'package:flutter_application_6/where_page.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int currentIndex = 0;
+  List<StatefulWidget> pages = [
+    const PostPage(),
+    const AddPage(),
+    const WherePage()
+  ];
+  @override
+  void initState() {
+    super.initState();
+    getUserInfo();
+  }
+
+  Future<void> getUserInfo() async {
+    Map<String, dynamic>? userInfo = await getCurrentUserInformation();
+    if (userInfo != null) {
+      setState(() {
+        userInformation = userInfo;
+      });
+    } else {
+      // Kullanıcı bilgisi alınamadı
+    }
+  }
+
+  Map<String, dynamic>? userInformation = {};
+  Future<Map<String, dynamic>?> getCurrentUserInformation() async {
+    // Oturum açmış kullanıcının bilgilerini almak için FirebaseAuth kullanılır
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // FirebaseAuth ile kullanıcının UID'sini alırız
+      String userId = user.uid;
+
+      try {
+        // Firestore üzerindeki users koleksiyonundan oturum açmış kullanıcının bilgilerini almak için
+        // kullanıcının UID'sini kullanarak sorgu yaparız
+        DocumentSnapshot<Map<String, dynamic>> userData =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .get();
+
+        debugPrint(userData["email"].toString());
+        if (userData.exists) {
+          // Kullanıcıya ait veri varsa dökümanı Map olarak döndürürüz
+          return userData.data();
+        } else {
+          // Kullanıcıya ait veri yoksa null döndürürüz
+          return null;
+        }
+      } catch (e) {
+        // Hata durumunda null döndürürüz
+        debugPrint("Kullanıcı bilgileri alınamadı: $e");
+        return null;
+      }
+    } else {
+      // Oturum açmış bir kullanıcı yoksa null döndürürüz
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      bottomNavigationBar: CurvedNavigationBar(
+        animationDuration: const Duration(milliseconds: 400),
+        height: 70,
+        color: Colors.deepPurpleAccent,
+        buttonBackgroundColor: Colors.deepPurpleAccent,
+        backgroundColor: Colors.white,
+        index: currentIndex,
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
+        items: const [
+          Icon(Icons.home),
+          Icon(Icons.add),
+          Icon(Icons.location_on),
+        ],
+      ),
+      appBar: AppBar(
+        title: const Text('Flutter TFlite'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurpleAccent,
+      ),
+      drawer: Drawer(
+        width: 230,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                  SizedBox(
+                    height: 200,
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        CircleAvatar(
+                          radius: 30,
+                          child: Text(
+                            userInformation!["email"]
+                                .toString()
+                                .toUpperCase()[0],
+                            style: const TextStyle(fontSize: 30),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        const Text(
+                          "E-Mail",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        Text(userInformation!["email"].toString(),
+                            style: const TextStyle(fontSize: 15)),
+                            const SizedBox(
+                          height: 15,
+                        ),
+                        Text(userInformation!["userName"].toString(),
+                            style: const TextStyle(fontSize: 15)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const Divider(color: Colors.grey),
+              GestureDetector(
+                child: const ListTile(
+                  title: Text("Çıkış Yap",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.black)),
+                  leading: Icon(
+                    Icons.output_sharp,
+                    color: Colors.black,
+                  ),
+                ),
+                onTap: () {
+                  FirebaseAuth.instance.signOut();
+                },
+              ),
+              Expanded(child: Container()),
+              const Text(
+                "info@gmail.com",
+                style: TextStyle(color: Colors.black),
+              ),
+              const SizedBox(
+                height: 10,
+              )
+            ],
+          ),
+        ),
+      ),
+      body: pages[currentIndex],
+    );
+  }
+}
