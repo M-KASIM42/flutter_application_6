@@ -1,11 +1,14 @@
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/add_page.dart';
 import 'package:flutter_application_6/post_page.dart';
 import 'package:flutter_application_6/where_page.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -77,112 +80,151 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: CurvedNavigationBar(
-        animationDuration: const Duration(milliseconds: 400),
-        height: 70,
-        color: Colors.deepPurpleAccent,
-        buttonBackgroundColor: Colors.deepPurpleAccent,
-        backgroundColor: Colors.white,
-        index: currentIndex,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-        items: const [
-          Icon(Icons.home),
-          Icon(Icons.add),
-          Icon(Icons.location_on),
-        ],
-      ),
-      appBar: AppBar(
-        title: const Text('Flutter TFlite'),
-        centerTitle: true,
-        backgroundColor: Colors.deepPurpleAccent,
-      ),
-      drawer: Drawer(
-        width: 230,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                children: [
-                  SizedBox(
-                    height: 200,
-                    width: double.infinity,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        CircleAvatar(
-                          radius: 30,
-                          child: Text(
-                            userInformation!["email"]
-                                .toString()
-                                .toUpperCase()[0],
-                            style: const TextStyle(fontSize: 30),
+    return SafeArea(
+      child: Scaffold(
+        bottomNavigationBar: CurvedNavigationBar(
+          animationDuration: const Duration(milliseconds: 400),
+          height: 70,
+          color: Colors.deepPurpleAccent,
+          buttonBackgroundColor: Colors.deepPurpleAccent,
+          backgroundColor: Colors.white,
+          index: currentIndex,
+          onTap: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+          items: const [
+            Icon(Icons.home),
+            Icon(Icons.add),
+            Icon(Icons.location_on),
+          ],
+        ),
+        appBar: AppBar(
+          title: const Text('Flutter TFlite'),
+          centerTitle: true,
+          backgroundColor: Colors.deepPurpleAccent,
+        ),
+        drawer: Drawer(
+          width: 230,
+          child: Center(
+            child: Column(
+              children: [
+                Column(
+                  children: [
+                    SizedBox(
+                      height: 300,
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          const SizedBox(
+                            height: 50,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        const Text(
-                          "E-Mail",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                        const SizedBox(
-                          height: 15,
-                        ),
-                        Text(userInformation!["email"].toString(),
-                            style: const TextStyle(fontSize: 15)),
-                            const SizedBox(
-                          height: 15,
-                        ),
-                        Text(userInformation!["userName"].toString(),
-                            style: const TextStyle(fontSize: 15)),
-                      ],
+                          GestureDetector(
+                            onTap: () async {
+                              final _picker = await ImagePicker()
+                                  .pickImage(source: ImageSource.gallery);
+                              String fileName =
+                                  "${FirebaseAuth.instance.currentUser!.uid}.jpg";
+                              Reference ref = FirebaseStorage.instance
+                                  .ref()
+                                  .child("profilfoto")
+                                  .child(fileName);
+                              try {
+                                await ref.putFile(File(_picker!.path));
+                              } catch (e) {
+                                debugPrint("Hata: $e");
+                              }
+                              String profilFotoUrl = await ref.getDownloadURL();
+                              await FirebaseFirestore.instance
+                                  .collection("users")
+                                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                                  .update({"profilfoto": profilFotoUrl});
+                              setState(() {
+                                userInformation!["profilfoto"] = profilFotoUrl;
+                              });
+                            },
+                            child: CircleAvatar(
+                                radius: 30,
+                                child:
+                                    userInformation!["profilfoto"].toString() !=
+                                            ""
+                                        ? ClipOval(
+                                            child: Image.network(
+                                              userInformation!["profilfoto"]
+                                                  .toString(),
+                                              fit: BoxFit.cover,
+                                              width: 70,
+                                              height: 70,
+                                            ),
+                                          )
+                                        : const Icon(Icons.person)),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          const Text(
+                            "E-Mail",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          Text(userInformation!["email"].toString(),
+                              style: const TextStyle(fontSize: 15)),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          const Text(
+                            "Kullanıcı Adı",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Text(userInformation!["userName"].toString(),
+                              style: const TextStyle(fontSize: 15)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Divider(color: Colors.grey),
+                GestureDetector(
+                  child: const ListTile(
+                    title: Text("Çıkış Yap",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.black)),
+                    leading: Icon(
+                      Icons.output_sharp,
+                      color: Colors.black,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Divider(color: Colors.grey),
-              GestureDetector(
-                child: const ListTile(
-                  title: Text("Çıkış Yap",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.black)),
-                  leading: Icon(
-                    Icons.output_sharp,
-                    color: Colors.black,
-                  ),
+                  onTap: () {
+                    FirebaseAuth.instance.signOut();
+                  },
                 ),
-                onTap: () {
-                  FirebaseAuth.instance.signOut();
-                },
-              ),
-              Expanded(child: Container()),
-              const Text(
-                "info@gmail.com",
-                style: TextStyle(color: Colors.black),
-              ),
-              const SizedBox(
-                height: 10,
-              )
-            ],
+                Expanded(child: Container()),
+                const Text(
+                  "info@gmail.com",
+                  style: TextStyle(color: Colors.black),
+                ),
+                const SizedBox(
+                  height: 10,
+                )
+              ],
+            ),
           ),
         ),
+        body: pages[currentIndex],
       ),
-      body: pages[currentIndex],
     );
   }
 }

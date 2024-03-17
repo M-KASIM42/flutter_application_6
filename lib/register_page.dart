@@ -1,9 +1,8 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/my_api.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -146,8 +145,11 @@ class _RegisterPageState extends State<RegisterPage> {
                             'email': email,
                             'password': password,
                             'userName': userName,
+                            'profilfoto': ""
                           }));
-
+                  MyApi.setUser(userName);
+                  MyApi.setEmail(email);
+                  MyApi.setProfilFoto("");
                   // E-posta doğrulama e-postası gönderme
                   User? user = FirebaseAuth.instance.currentUser;
                   await user?.sendEmailVerification();
@@ -157,7 +159,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   if (context.mounted) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (loginpage) => LoginPage()),
+                      MaterialPageRoute(
+                          builder: (loginpage) => const LoginPage()),
                     );
                   }
                 } catch (error) {
