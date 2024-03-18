@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:geocoding/geocoding.dart';
 
 class PostPage extends StatefulWidget {
   const PostPage({Key? key}) : super(key: key);
@@ -10,7 +12,6 @@ class PostPage extends StatefulWidget {
 }
 
 class _PostPageState extends State<PostPage> {
-  final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Map<String, dynamic>> _images = [];
@@ -24,12 +25,11 @@ class _PostPageState extends State<PostPage> {
 
   @override
   Widget build(BuildContext context) {
-    return 
-      _loading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : _buildImageList();
+    return _loading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : _buildImageList();
   }
 
   Widget _buildImageList() {
@@ -42,7 +42,6 @@ class _PostPageState extends State<PostPage> {
   }
 
   Widget _buildPostCard(Map<String, dynamic> imageData) {
-
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: Column(
@@ -55,7 +54,11 @@ class _PostPageState extends State<PostPage> {
             title: const Text('Kullanıcı Adı'),
             subtitle: Text(imageData['kullanici_adi'].toString()),
           ),
-          Image.network(imageData['foto_url']),
+          CachedNetworkImage(
+            imageUrl: imageData['foto_url'],
+            placeholder: (context, url) => Container(), // Placeholder ekleyin
+            errorWidget: (context, url, error) => Icon(Icons.error), // Hata durumunda gösterilecek widget
+          ),
           ButtonBar(
             alignment: MainAxisAlignment.center,
             children: [
@@ -72,8 +75,24 @@ class _PostPageState extends State<PostPage> {
                 icon: Icon(Icons.comment),
               ),
               IconButton(
-                onPressed: () {
+                onPressed: () async {
                   // Konum butonu işlevselliği
+                  GeoPoint point = imageData["nerede"];
+                  double latitude = point.latitude;
+                  double longitude = point.longitude;
+
+                  // Konumun adını al
+                  String locationName = await _getLocationName(latitude, longitude);
+
+                  // Google Maps URL oluştur
+                  final String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+
+                  // Google Maps uygulamasını aç
+                  if (await canLaunch(googleMapsUrl)) {
+                    await launch(googleMapsUrl);
+                  } else {
+                    throw 'Google Maps uygulaması açılamadı.';
+                  }
                 },
                 icon: Icon(Icons.location_on),
               ),
@@ -84,10 +103,23 @@ class _PostPageState extends State<PostPage> {
     );
   }
 
+  Future<String> _getLocationName(double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        return placemarks[0].name ?? 'Belirsiz';
+      } else {
+        return 'Belirsiz';
+      }
+    } catch (e) {
+      print('Hata: $e');
+      return 'Belirsiz';
+    }
+  }
+
   Future<void> _getImages() async {
     try {
-      QuerySnapshot querySnapshot =
-          await _firestore.collection('users').get();
+      QuerySnapshot querySnapshot = await _firestore.collection('users').get();
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         String userId = doc.id;
         QuerySnapshot imageSnapshot = await _firestore
@@ -100,25 +132,22 @@ class _PostPageState extends State<PostPage> {
           String url = imageDoc['foto_url'];
           int date = imageDoc['tarih'];
           String kullanici_adi = imageDoc['kullanici_adi'];
-          String nerde = imageDoc['nerede'];
+          GeoPoint nerde = imageDoc['nerede'];
           String profil_foto = imageDoc['profil_foto'];
-          setState(() {
-            _images.add({
-              'foto_url': url,
-              'profil_foto' : profil_foto,
-              'tarih': date,
-              'kullanici_adi': kullanici_adi,
-              'nerede': nerde,
-            });
+
+          _images.add({
+            'foto_url': url,
+            'profil_foto': profil_foto,
+            'tarih': date,
+            'kullanici_adi': kullanici_adi,
+            'nerede': nerde,
           });
         }
+        _images.sort((a, b) => b['tarih'].compareTo(a['tarih']));
         setState(() {
-          _images.sort((a, b) => b['tarih'].compareTo(a['tarih']));
+          _loading = false;
         });
       }
-      setState(() {
-        _loading = false;
-      });
     } catch (e) {
       print('Hata: $e');
     }

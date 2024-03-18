@@ -101,7 +101,7 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
         appBar: AppBar(
-          title: const Text('Flutter TFlite'),
+          title: const Text('MOBİLE APPLİCATİON'),
           centerTitle: true,
           backgroundColor: Colors.deepPurpleAccent,
         ),

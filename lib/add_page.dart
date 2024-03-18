@@ -199,9 +199,13 @@ class _AddPageState extends State<AddPage> {
               debugPrint("Hata: $e");
             }
             String FotoUrl = await ref.getDownloadURL();
-            DocumentSnapshot docref = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
+            DocumentSnapshot docref = await FirebaseFirestore.instance
+                .collection("users")
+                .doc(FirebaseAuth.instance.currentUser!.uid)
+                .get();
             String kullaniciAdi = docref.get("userName");
             String profilFoto = docref.get("profilfoto");
+            GeoPoint point = const GeoPoint(41.575465, 36.080651);
             final DocumentReference documentReference = await FirebaseFirestore
                 .instance
                 .collection("users")
@@ -216,7 +220,7 @@ class _AddPageState extends State<AddPage> {
               "profil_foto": profilFoto,
               "kullanici_adi": kullaniciAdi,
               "tarih": DateTime.now().microsecondsSinceEpoch,
-              "nerede": "a",
+              "nerede": point,
               "yorumlar": [
                 {"kullanici_adi": "kasim", "yorum": "yorum"}
               ],
