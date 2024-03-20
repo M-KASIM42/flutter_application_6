@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geocoding/geocoding.dart';
@@ -16,6 +17,8 @@ class _PostPageState extends State<PostPage> {
 
   List<Map<String, dynamic>> _images = [];
   bool _loading = true;
+  String kullanAdi = "";
+  TextEditingController _yorumController = TextEditingController();
 
   @override
   void initState() {
@@ -57,7 +60,8 @@ class _PostPageState extends State<PostPage> {
           CachedNetworkImage(
             imageUrl: imageData['foto_url'],
             placeholder: (context, url) => Container(), // Placeholder ekleyin
-            errorWidget: (context, url, error) => Icon(Icons.error), // Hata durumunda gösterilecek widget
+            errorWidget: (context, url, error) =>
+                Icon(Icons.error), // Hata durumunda gösterilecek widget
           ),
           ButtonBar(
             alignment: MainAxisAlignment.center,
@@ -69,7 +73,99 @@ class _PostPageState extends State<PostPage> {
                 icon: const Icon(Icons.favorite),
               ),
               IconButton(
-                onPressed: () {
+                onPressed: () async {
+                  try {
+                    debugPrint(imageData.toString());
+                    QuerySnapshot querySnapshot =
+                        await _firestore.collection('users').get();
+                    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+                      String userId = doc.id;
+                      QuerySnapshot imageSnapshot = await _firestore
+                          .collection('users')
+                          .doc(userId)
+                          .collection('fotograflarim')
+                          .orderBy('tarih', descending: true)
+                          .get();
+                      for (QueryDocumentSnapshot imageDoc
+                          in imageSnapshot.docs) {
+                        String imageId = imageDoc["id"]
+                            .toString(); // imageData['id'] ifadesi burada düzeltilmiştir.
+                        String imageDataId = imageData['id'].toString();
+                        // debugPrint(imageId);
+                        // debugPrint(imageDataId);
+                        if (imageId == imageDataId) {
+                          debugPrint(imageData["yorumlar"].toString());
+                        }
+                        //debugPrint(imageDoc["yorumlar"].toString());
+                      }
+                    }
+                  } catch (e) {
+                    print('Hata: $e');
+                  }
+                  if (context.mounted) {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Yorumlar',
+                                style: Theme.of(context).textTheme.headline6,
+                              ),
+                              const SizedBox(height: 16.0),
+                              for (var yorum in imageData["yorumlar"])
+                                Row(
+                                  children: [
+                                    Text(yorum["kullanici_adi"]),
+                                    Text(yorum["yorum"]),
+                                  ],
+                                ),
+                              TextField(
+                                  controller: _yorumController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Yorumunuzu girin',
+                                  )),
+                              ElevatedButton(
+                                  onPressed: () async{
+                                    String kulAdi = FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get().toString();
+                                    debugPrint(imageData["kullanici_adi"]);
+                                    String yorum = _yorumController.text;
+                                    _firestore
+                                        .collection('users')
+                                        .doc(imageData["userId"])
+                                        .collection('fotograflarim')
+                                        .doc(imageData["id"])
+                                        .update({
+                                      "yorumlar": FieldValue.arrayUnion([
+                                        {
+                                          "kullanici_adi":
+                                              kullanAdi,
+                                          "yorum": yorum
+                                        }
+                                      ])
+                                    });
+                                    setState(() {
+                                      _yorumController.text = "";
+                                      imageData["yorumlar"].add({
+                                        "kullanici_adi":
+                                            kullanAdi,
+                                        "yorum": yorum
+                                      });
+                                      
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: Center(child: Text("Yorum Yap")))
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }
+
                   // Yorum butonu işlevselliği
                 },
                 icon: Icon(Icons.comment),
@@ -82,10 +178,12 @@ class _PostPageState extends State<PostPage> {
                   double longitude = point.longitude;
 
                   // Konumun adını al
-                  String locationName = await _getLocationName(latitude, longitude);
+                  String locationName =
+                      await _getLocationName(latitude, longitude);
 
                   // Google Maps URL oluştur
-                  final String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+                  final String googleMapsUrl =
+                      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
 
                   // Google Maps uygulamasını aç
                   if (await canLaunch(googleMapsUrl)) {
@@ -105,7 +203,8 @@ class _PostPageState extends State<PostPage> {
 
   Future<String> _getLocationName(double latitude, double longitude) async {
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
       if (placemarks.isNotEmpty) {
         return placemarks[0].name ?? 'Belirsiz';
       } else {
@@ -120,6 +219,10 @@ class _PostPageState extends State<PostPage> {
   Future<void> _getImages() async {
     try {
       QuerySnapshot querySnapshot = await _firestore.collection('users').get();
+      await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) {
+        kullanAdi = value.get("userName");
+      });
+      debugPrint(kullanAdi);
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         String userId = doc.id;
         QuerySnapshot imageSnapshot = await _firestore
@@ -129,18 +232,24 @@ class _PostPageState extends State<PostPage> {
             .orderBy('tarih', descending: true)
             .get();
         for (QueryDocumentSnapshot imageDoc in imageSnapshot.docs) {
+          imageDoc.id;
           String url = imageDoc['foto_url'];
           int date = imageDoc['tarih'];
           String kullanici_adi = imageDoc['kullanici_adi'];
           GeoPoint nerde = imageDoc['nerede'];
           String profil_foto = imageDoc['profil_foto'];
+          String id = imageDoc["id"].toString();
+          String UserId = imageDoc["userId"];
 
           _images.add({
+            'userId' : userId,
             'foto_url': url,
             'profil_foto': profil_foto,
             'tarih': date,
             'kullanici_adi': kullanici_adi,
             'nerede': nerde,
+            'id': id,
+            "yorumlar": imageDoc["yorumlar"] ?? "Yorum Yok"
           });
         }
         _images.sort((a, b) => b['tarih'].compareTo(a['tarih']));

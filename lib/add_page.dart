@@ -212,6 +212,7 @@ class _AddPageState extends State<AddPage> {
                 .doc(FirebaseAuth.instance.currentUser!.uid)
                 .collection("fotograflarim")
                 .add({
+              "userId" : FirebaseAuth.instance.currentUser!.uid,
               "balik_adet": 0,
               "balik_turu": "a",
               "balik_tanim": "a",
@@ -222,10 +223,16 @@ class _AddPageState extends State<AddPage> {
               "tarih": DateTime.now().microsecondsSinceEpoch,
               "nerede": point,
               "yorumlar": [
-                {"kullanici_adi": "kasim", "yorum": "yorum"}
+                {"kullanici_adi": "sami", "yorum": "sami yorum"}
               ],
             });
             if (documentReference.id != null) {
+              await FirebaseFirestore.instance
+                  .collection("users")
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .collection("fotograflarim")
+                  .doc(documentReference.id)
+                  .update({"id": documentReference.id});
               Fluttertoast.showToast(
                   msg: "Fotoğraf başarıyla yüklendi",
                   toastLength: Toast.LENGTH_LONG);
