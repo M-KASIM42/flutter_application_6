@@ -19,10 +19,13 @@ class _PostPageState extends State<PostPage> {
   bool _loading = true;
   String kullanAdi = "";
   TextEditingController _yorumController = TextEditingController();
+  List<String> begeniler = [];
+  String docId = "";
 
   @override
   void initState() {
     super.initState();
+    _getBegeniler();
     _getImages();
   }
 
@@ -68,9 +71,41 @@ class _PostPageState extends State<PostPage> {
             children: [
               IconButton(
                 onPressed: () {
+                  try {
+                    
+                    if (begeniler.contains(imageData["id"])) {
+                    _firestore
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .collection('begendiklerim')
+                        .doc(docId)
+                        .update({
+                      'fotolar': FieldValue.arrayRemove([imageData["id"]])
+                    });
+                    setState(() {
+                      begeniler.remove(imageData["id"]);
+                    });
+                  } else {
+                    _firestore
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .collection('begendiklerim')
+                        .doc(docId)
+                        .update({
+                      'fotolar': FieldValue.arrayUnion([imageData["id"]])
+                    });
+                    setState(() {
+                      begeniler.add(imageData["id"]);
+                    });
+                  }
+                    
+                  } catch (e) {
+                    debugPrint('Hata: $e');
+                  }
+                  
                   // Beğeni butonu işlevselliği
                 },
-                icon: const Icon(Icons.favorite),
+                icon:  Icon(Icons.favorite,color: begeniler.contains(imageData["id"]) ? Colors.red : Colors.grey),
               ),
               IconButton(
                 onPressed: () async {
@@ -260,5 +295,23 @@ class _PostPageState extends State<PostPage> {
     } catch (e) {
       print('Hata: $e');
     }
+  }
+  
+  void _getBegeniler() {
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+    docId = userId;
+  // Kullanıcının UID'sini kullanarak belge oluştur
+  _firestore
+    .collection('users')
+    .doc(userId)
+    .collection('begendiklerim')
+    .doc(userId)
+    .set({'fotolar': []}) // Boş bir fotolar listesi ile belge oluştur
+    .then((_) {
+      print('Kullanıcı belgesi başarıyla oluşturuldu.');
+    })
+    .catchError((error) {
+      print('Hata: $error');
+    });
   }
 }
