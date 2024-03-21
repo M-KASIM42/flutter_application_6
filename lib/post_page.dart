@@ -299,19 +299,42 @@ class _PostPageState extends State<PostPage> {
   
   void _getBegeniler() {
     String userId = FirebaseAuth.instance.currentUser!.uid;
-    docId = userId;
+  docId = userId;
+
   // Kullanıcının UID'sini kullanarak belge oluştur
   _firestore
     .collection('users')
     .doc(userId)
     .collection('begendiklerim')
     .doc(userId)
-    .set({'fotolar': []}) // Boş bir fotolar listesi ile belge oluştur
-    .then((_) {
-      print('Kullanıcı belgesi başarıyla oluşturuldu.');
+    .get() // Belgeyi al
+    .then((docSnapshot) {
+      if (docSnapshot.exists) {
+        // Belge varsa, fotolar alanındaki verileri al
+        List<dynamic> fotolar = docSnapshot.data()?['fotolar'] ?? [];
+        
+        // fotolar listesine ekle
+        fotolar.forEach((begeni) {
+          begeniler.add(begeni.toString());
+        });
+      } else {
+        // Belge yoksa, boş bir fotolar listesiyle belge oluştur
+        _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('begendiklerim')
+          .doc(userId)
+          .set({'fotolar': []}) // Boş bir fotolar listesi ile belge oluştur
+          .then((_) {
+            print('Kullanıcı belgesi başarıyla oluşturuldu.');
+          })
+          .catchError((error) {
+            print('Belge oluşturma hatası: $error');
+          });
+      }
     })
     .catchError((error) {
-      print('Hata: $error');
+      print('Belge alma hatası: $error');
     });
   }
 }
