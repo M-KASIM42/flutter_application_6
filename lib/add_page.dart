@@ -23,7 +23,8 @@ class _AddPageState extends State<AddPage> {
   File? file;
   var _recognitions;
   var v = "";
-  // var dataList = [];
+    int degis = 0;
+    TextEditingController _nerdeController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -89,78 +90,81 @@ class _AddPageState extends State<AddPage> {
     print("Inference took ${endTime - startTime}ms");
   }
 
-  int degis = 0;
+
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    degis == 0 ? Colors.deepPurpleAccent : Colors.grey,
-              ),
-              onPressed: () {
-                setState(() {
-                  degis = 0;
-                });
-              },
-              child: Text("Foto sorgula"),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    degis == 1 ? Colors.deepPurpleAccent : Colors.grey,
-              ),
-              onPressed: () {
-                setState(() {
-                  degis = 1;
-                });
-              },
-              child: Text("Fotoğraf yükle"),
-            )
-          ],
-        ),
-        degis == 0 ? fotosorgula() : fotoyukle(),
-      ],
-    );
-  }
-
-  Widget fotosorgula() {
-    return Center(
+    return SingleChildScrollView(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          if (_image != null)
-            Image.file(
-              File(_image!.path),
-              height: 200,
-              width: 200,
-              fit: BoxFit.cover,
-            )
-          else
-            Text('No image selected'),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _pickImage,
-            child: Text('Pick Image from Gallery'),
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      degis == 0 ? Colors.deepPurpleAccent : Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    degis = 0;
+                  });
+                },
+                child: Text("Foto sorgula"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      degis == 1 ? Colors.deepPurpleAccent : Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    degis = 1;
+                  });
+                },
+                child: Text("Fotoğraf yükle"),
+              )
+            ],
           ),
-          ElevatedButton(
-            onPressed: _pickImage2,
-            child: Text('Pick Image from Camera'),
-          ),
-          SizedBox(height: 20),
-          Text(v),
+          degis == 0 ? fotosorgula() : fotoyukle(),
         ],
       ),
     );
   }
+
+  Widget fotosorgula() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        if (_image != null)
+          Expanded(
+            child: Image.file(
+              File(_image!.path),
+              fit: BoxFit.cover,
+            ),
+          )
+        else
+        Text('No image selected'),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: _pickImage,
+          child: Text('Pick Image from Gallery'),
+        ),
+        ElevatedButton(
+          onPressed: _pickImage2,
+          child: Text('Pick Image from Camera'),
+        ),
+        SizedBox(height: 20),
+        Text(v),
+      ],
+    ),
+  );
+}
+
 
   Widget fotoyukle() {
     return Column(
@@ -186,6 +190,11 @@ class _AddPageState extends State<AddPage> {
         ),
         SizedBox(height: 20),
         Text(v),
+        TextField(
+          controller: _nerdeController,
+          decoration:  InputDecoration(hintText: "Nerede tutuldu",border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+
+        ),
         ElevatedButton(
           onPressed: () async {
             Reference ref = FirebaseStorage.instance
@@ -214,8 +223,8 @@ class _AddPageState extends State<AddPage> {
                 .add({
               "userId" : FirebaseAuth.instance.currentUser!.uid,
               "balik_adet": 0,
-              "balik_turu": "a",
-              "balik_tanim": "a",
+              "balik_turu": _recognitions[0]["label"].toString().split(' ')[1].toString(),
+              "balik_tanim": _nerdeController.text,
               "begeni_sayisi": 0,
               "foto_url": FotoUrl,
               "profil_foto": profilFoto,
@@ -240,6 +249,7 @@ class _AddPageState extends State<AddPage> {
                 v = "";
                 _image = null;
                 file = null;
+                _nerdeController.text = "";
               });
             }
           },

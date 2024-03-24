@@ -16,8 +16,12 @@ class _PostPageState extends State<PostPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Map<String, dynamic>> _images = [];
+  List<Map<String, dynamic>> aramaimages = [];
+
   bool _loading = true;
   String kullanAdi = "";
+  String balikAdi = "";
+  String mekanAdi = "";
   TextEditingController _yorumController = TextEditingController();
   List<String> begeniler = [];
   String docId = "";
@@ -39,11 +43,67 @@ class _PostPageState extends State<PostPage> {
   }
 
   Widget _buildImageList() {
-    return ListView.builder(
-      itemCount: _images.length,
-      itemBuilder: (context, index) {
-        return _buildPostCard(_images[index]);
-      },
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  onChanged: (value) => balikAdi = value,
+                  decoration: const InputDecoration(
+                    labelText: 'Balık Türü',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.search),
+                onPressed: () {
+                  aranangetir(balikAdi, mekanAdi);
+                  // Arama metodu buraya gelecek
+                  // Örnek:
+                  // yönlendirmeMetodu();
+                },
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  onChanged: (value) => mekanAdi = value,
+                  decoration: const InputDecoration(
+                    labelText: 'Mekan Ara',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.search),
+                onPressed: () {
+                  aranangetir(balikAdi, mekanAdi);
+                  // Arama metodu buraya gelecek
+                  // Örnek:
+                  // yönlendirmeMetodu();
+                },
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _images.length,
+            itemBuilder: (context, index) {
+              return _buildPostCard(_images[index]);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -72,40 +132,41 @@ class _PostPageState extends State<PostPage> {
               IconButton(
                 onPressed: () {
                   try {
-                    
                     if (begeniler.contains(imageData["id"])) {
-                    _firestore
-                        .collection('users')
-                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                        .collection('begendiklerim')
-                        .doc(docId)
-                        .update({
-                      'fotolar': FieldValue.arrayRemove([imageData["id"]])
-                    });
-                    setState(() {
-                      begeniler.remove(imageData["id"]);
-                    });
-                  } else {
-                    _firestore
-                        .collection('users')
-                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                        .collection('begendiklerim')
-                        .doc(docId)
-                        .update({
-                      'fotolar': FieldValue.arrayUnion([imageData["id"]])
-                    });
-                    setState(() {
-                      begeniler.add(imageData["id"]);
-                    });
-                  }
-                    
+                      _firestore
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .collection('begendiklerim')
+                          .doc(docId)
+                          .update({
+                        'fotolar': FieldValue.arrayRemove([imageData["id"]])
+                      });
+                      setState(() {
+                        begeniler.remove(imageData["id"]);
+                      });
+                    } else {
+                      _firestore
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .collection('begendiklerim')
+                          .doc(docId)
+                          .update({
+                        'fotolar': FieldValue.arrayUnion([imageData["id"]])
+                      });
+                      setState(() {
+                        begeniler.add(imageData["id"]);
+                      });
+                    }
                   } catch (e) {
                     debugPrint('Hata: $e');
                   }
-                  
+
                   // Beğeni butonu işlevselliği
                 },
-                icon:  Icon(Icons.favorite,color: begeniler.contains(imageData["id"]) ? Colors.red : Colors.grey),
+                icon: Icon(Icons.favorite,
+                    color: begeniler.contains(imageData["id"])
+                        ? Colors.red
+                        : Colors.grey),
               ),
               IconButton(
                 onPressed: () async {
@@ -164,8 +225,13 @@ class _PostPageState extends State<PostPage> {
                                     labelText: 'Yorumunuzu girin',
                                   )),
                               ElevatedButton(
-                                  onPressed: () async{
-                                    String kulAdi = FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get().toString();
+                                  onPressed: () async {
+                                    String kulAdi = FirebaseFirestore.instance
+                                        .collection("users")
+                                        .doc(FirebaseAuth
+                                            .instance.currentUser!.uid)
+                                        .get()
+                                        .toString();
                                     debugPrint(imageData["kullanici_adi"]);
                                     String yorum = _yorumController.text;
                                     _firestore
@@ -176,8 +242,7 @@ class _PostPageState extends State<PostPage> {
                                         .update({
                                       "yorumlar": FieldValue.arrayUnion([
                                         {
-                                          "kullanici_adi":
-                                              kullanAdi,
+                                          "kullanici_adi": kullanAdi,
                                           "yorum": yorum
                                         }
                                       ])
@@ -185,11 +250,9 @@ class _PostPageState extends State<PostPage> {
                                     setState(() {
                                       _yorumController.text = "";
                                       imageData["yorumlar"].add({
-                                        "kullanici_adi":
-                                            kullanAdi,
+                                        "kullanici_adi": kullanAdi,
                                         "yorum": yorum
                                       });
-                                      
                                     });
                                     Navigator.pop(context);
                                   },
@@ -254,7 +317,11 @@ class _PostPageState extends State<PostPage> {
   Future<void> _getImages() async {
     try {
       QuerySnapshot querySnapshot = await _firestore.collection('users').get();
-      await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get()
+          .then((value) {
         kullanAdi = value.get("userName");
       });
       debugPrint(kullanAdi);
@@ -275,13 +342,29 @@ class _PostPageState extends State<PostPage> {
           String profil_foto = imageDoc['profil_foto'];
           String id = imageDoc["id"].toString();
           String UserId = imageDoc["userId"];
+          String balikturu = imageDoc["balik_turu"];
+          String balik_tanim = imageDoc["balik_tanim"];
 
           _images.add({
-            'userId' : userId,
+            'userId': userId,
             'foto_url': url,
             'profil_foto': profil_foto,
             'tarih': date,
             'kullanici_adi': kullanici_adi,
+            'balik_turu': balikturu,
+            'balik_tanim': balik_tanim,
+            'nerede': nerde,
+            'id': id,
+            "yorumlar": imageDoc["yorumlar"] ?? "Yorum Yok"
+          });
+          aramaimages.add({
+            'userId': userId,
+            'foto_url': url,
+            'profil_foto': profil_foto,
+            'tarih': date,
+            'kullanici_adi': kullanici_adi,
+            'balik_turu': balikturu,
+            'balik_tanim': balik_tanim,
             'nerede': nerde,
             'id': id,
             "yorumlar": imageDoc["yorumlar"] ?? "Yorum Yok"
@@ -296,23 +379,23 @@ class _PostPageState extends State<PostPage> {
       print('Hata: $e');
     }
   }
-  
+
   void _getBegeniler() {
     String userId = FirebaseAuth.instance.currentUser!.uid;
-  docId = userId;
+    docId = userId;
 
-  // Kullanıcının UID'sini kullanarak belge oluştur
-  _firestore
-    .collection('users')
-    .doc(userId)
-    .collection('begendiklerim')
-    .doc(userId)
-    .get() // Belgeyi al
-    .then((docSnapshot) {
+    // Kullanıcının UID'sini kullanarak belge oluştur
+    _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('begendiklerim')
+        .doc(userId)
+        .get() // Belgeyi al
+        .then((docSnapshot) {
       if (docSnapshot.exists) {
         // Belge varsa, fotolar alanındaki verileri al
         List<dynamic> fotolar = docSnapshot.data()?['fotolar'] ?? [];
-        
+
         // fotolar listesine ekle
         fotolar.forEach((begeni) {
           begeniler.add(begeni.toString());
@@ -320,21 +403,62 @@ class _PostPageState extends State<PostPage> {
       } else {
         // Belge yoksa, boş bir fotolar listesiyle belge oluştur
         _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('begendiklerim')
-          .doc(userId)
-          .set({'fotolar': []}) // Boş bir fotolar listesi ile belge oluştur
-          .then((_) {
-            print('Kullanıcı belgesi başarıyla oluşturuldu.');
-          })
-          .catchError((error) {
-            print('Belge oluşturma hatası: $error');
-          });
+            .collection('users')
+            .doc(userId)
+            .collection('begendiklerim')
+            .doc(userId)
+            .set({'fotolar': []}) // Boş bir fotolar listesi ile belge oluştur
+            .then((_) {
+          print('Kullanıcı belgesi başarıyla oluşturuldu.');
+        }).catchError((error) {
+          print('Belge oluşturma hatası: $error');
+        });
       }
-    })
-    .catchError((error) {
+    }).catchError((error) {
       print('Belge alma hatası: $error');
     });
+  }
+
+  void aranangetir(String balikAdi, String mekanadi) {
+    if (mekanAdi != "" && balikAdi != "") {
+      _images = aramaimages;
+      List<Map<String, dynamic>> _images2 = [];
+      for (var i = 0; i < _images.length; i++) {
+        if (_images[i]["balik_turu"] == balikAdi &&
+            _images[i]["balik_tanim"] == mekanAdi) {
+          _images2.add(_images[i]);
+        }
+      }
+      setState(() {
+        _images = _images2;
+      });
+    }
+    else if (mekanAdi != "" && balikAdi == "") {
+      _images = aramaimages;
+      List<Map<String, dynamic>> _images2 = [];
+      for (var i = 0; i < _images.length; i++) {
+        if (_images[i]["balik_tanim"] == mekanAdi) {
+          _images2.add(_images[i]);
+        }
+      }
+      setState(() {
+        _images = _images2;
+      });
+    }
+    else if (balikAdi != "" && mekanAdi == "") {
+      _images = aramaimages;
+      List<Map<String, dynamic>> _images2 = [];
+      for (var i = 0; i < _images.length; i++) {
+        if (_images[i]["balik_turu"] == balikAdi) {
+          _images2.add(_images[i]);
+        }
+      }
+      setState(() {
+        _images = _images2;
+      });
+    }
+    else {
+      _images = aramaimages;
+    }
   }
 }
