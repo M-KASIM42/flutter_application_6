@@ -15,23 +15,33 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-      backgroundColor: Colors.amber,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            "Mail adresinize parola sıfırlama linki göndereceğiz.",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20,color: Colors.white),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/balik.jpg"),
+            fit: BoxFit.cover,
           ),
-          SizedBox(height: 10,),
-          Text("Lütfen mail adresinizi giriniz",textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 20,color: Colors.white),),
-          Container(
-            height: 80,
-            width: 400,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              "Mail adresinize parola sıfırlama linki göndereceğiz.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, color: Colors.white),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              "Lütfen mail adresinizi giriniz",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, color: Colors.white),
+            ),
+            Container(
+              height: 80,
+              width: 400,
               margin: const EdgeInsets.all(20),
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
@@ -42,44 +52,51 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 padding: const EdgeInsets.all(20.0),
                 child: TextField(
                   keyboardType: TextInputType.emailAddress,
-                  
-                  controller:_emailController ,
+                  controller: _emailController,
                   decoration: InputDecoration(
                     hintText: 'Email',
-                    
                   ),
                 ),
               ),
             ),
-          SizedBox(height: 20,),
-          GestureDetector(
-            onTap: ()async{
-              try {
-                await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.text.trim());
-                Navigator.pop(context);
-                showDialog(context: context, builder: (context){
-                  return AlertDialog(content: Text("Sıfırlama linki mail adresinize gönderilidi"),);
-                });
-                
-                
-              }on FirebaseException catch (e) {
-                showDialog(context: context, builder: (context){
-                  return AlertDialog(content: Text(e.message.toString()),);
-                });
-              }
-              
-            },
-            child: Container(
-              height: 50,
-              width: 150,
-              decoration: BoxDecoration(
-                color: Colors.greenAccent,
-                borderRadius: BorderRadius.circular(20)
-              ),
-              child: Center(child: Text("Send Reset link")),
+            SizedBox(
+              height: 20,
             ),
-          )
-        ],
+            GestureDetector(
+              onTap: () async {
+                try {
+                  await FirebaseAuth.instance.sendPasswordResetEmail(
+                      email: _emailController.text.trim());
+                  Navigator.pop(context);
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text(
+                              "Sıfırlama linki mail adresinize gönderilidi"),
+                        );
+                      });
+                } on FirebaseException catch (e) {
+                  showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text(e.message.toString()),
+                        );
+                      });
+                }
+              },
+              child: Container(
+                height: 50,
+                width: 150,
+                decoration: BoxDecoration(
+                    color: Colors.greenAccent,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Center(child: Text("Send Reset link")),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

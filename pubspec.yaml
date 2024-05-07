@@ -47,6 +47,7 @@ dependencies:
   cached_network_image: ^3.2.3
   url_launcher: ^6.1.11
   geocoding: ^3.0.0
+  geolocator: ^11.0.0
   
   
   
@@ -78,6 +79,7 @@ flutter:
     - assets/labels.txt
     - assets/model_unquant.tflite
     - assets/profilfoto.png
+    - assets/balik.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

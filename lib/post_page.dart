@@ -371,6 +371,7 @@ class _PostPageState extends State<PostPage> {
           });
         }
         _images.sort((a, b) => b['tarih'].compareTo(a['tarih']));
+        aramaimages.sort((a, b) => b['tarih'].compareTo(a['tarih']));
         setState(() {
           _loading = false;
         });
@@ -420,6 +421,7 @@ class _PostPageState extends State<PostPage> {
   }
 
   void aranangetir(String balikAdi, String mekanadi) {
+
     if (mekanAdi != "" && balikAdi != "") {
       _images = aramaimages;
       List<Map<String, dynamic>> _images2 = [];
@@ -431,6 +433,11 @@ class _PostPageState extends State<PostPage> {
       }
       setState(() {
         _images = _images2;
+      });
+    }
+    else if(mekanAdi =="" && balikAdi==""){
+      setState(() {
+        _images = aramaimages;
       });
     }
     else if (mekanAdi != "" && balikAdi == "") {

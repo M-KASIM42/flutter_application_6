@@ -26,151 +26,163 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepPurple[200],
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "BALIK",
-              style: TextStyle(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/balik.jpg"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "BALIK",
+                style: TextStyle(
+                    color: Colors.deepOrangeAccent[200],
+                    fontSize: 50,
+                    fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Text(
+                "DÜNYASI",
+                style: TextStyle(
                   color: Colors.deepOrangeAccent[200],
-                  fontSize: 50,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              "DÜNYASI",
-              style: TextStyle(
-                color: Colors.deepOrangeAccent[200],
-                fontSize: 40,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: TextField(
-                  keyboardType: TextInputType.emailAddress,
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    hintText: 'Email',
-                  ),
+                  fontSize: 40,
                 ),
               ),
-            ),
-            Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: TextField(
-                  obscureText: true,
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    hintText: 'Password',
-                  ),
+              Container(
+                margin: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ForgotPassword()));
-                    },
-                    child: const Text(
-                      "Forgot Password",
-                      style: TextStyle(color: Colors.blue),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: TextField(
+                    keyboardType: TextInputType.emailAddress,
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      hintText: 'Email',
                     ),
-                  )
-                ],
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  UserCredential userCredential = await FirebaseAuth.instance
-                      .signInWithEmailAndPassword(
-                          email: _emailController.text.trim(),
-                          password: _passwordController.text.trim());
-
-                  // Kullanıcının e-posta doğrulaması yapılmış mı kontrol etme
-                  if (userCredential.user != null) {
-                    User user = userCredential.user!;
-                    if (user.emailVerified) {
-                      if (context.mounted) {
+              Container(
+                margin: const EdgeInsets.all(20),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.white,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: TextField(
+                    obscureText: true,
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      hintText: 'Password',
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (mymainpage) => MyApp()));
+                                builder: (context) => const ForgotPassword()));
+                      },
+                      child: const Text(
+                        "Forgot Password",
+                        style: TextStyle(
+                            color: Colors.blue, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance
+                        .signInWithEmailAndPassword(
+                            email: _emailController.text.trim(),
+                            password: _passwordController.text.trim());
+
+                    // Kullanıcının e-posta doğrulaması yapılmış mı kontrol etme
+                    if (userCredential.user != null) {
+                      User user = userCredential.user!;
+                      if (user.emailVerified) {
+                        if (context.mounted) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (mymainpage) => MyApp()));
+                        }
+                      } else {
+                        // E-posta doğrulaması yapılmamış kullanıcı
+                        Fluttertoast.showToast(
+                            msg: "E-posta doğrulaması yapılmamış kullanıcı",
+                            toastLength: Toast.LENGTH_LONG);
                       }
-                    } else {
-                      // E-posta doğrulaması yapılmamış kullanıcı
-                      Fluttertoast.showToast(
-                          msg: "E-posta doğrulaması yapılmamış kullanıcı",
-                          toastLength: Toast.LENGTH_LONG);
                     }
+                  } catch (e) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: Text("Hata"),
+                          content: Text(
+                              "Bilgilerinizi kontrol edip tekrar deneyin!"),
+                        );
+                      },
+                    );
                   }
-                } catch (e) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const AlertDialog(
-                        title: Text("Hata"),
-                        content:
-                            Text("Bilgilerinizi kontrol edip tekrar deneyin!"),
+                },
+                child: const Text("Giriş Yap"),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Hesabın yok mu ",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextButton(
+                    child: const Text("Kayıt Ol",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (registerContex) => const RegisterPage(),
+                        ),
                       );
                     },
-                  );
-                }
-              },
-              child: const Text("Giriş Yap"),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Hesabın yok mu "),
-                TextButton(
-                  child: const Text("Kayıt Ol"),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (registerContex) => const RegisterPage(),
-                      ),
-                    );
-                  },
-                )
-              ],
-            )
-          ],
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

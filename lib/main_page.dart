@@ -5,10 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/add_page.dart';
+import 'package:flutter_application_6/hesapayarlari_page.dart';
 import 'package:flutter_application_6/post_page.dart';
 import 'package:flutter_application_6/where_page.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'fotograflarim_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -193,6 +196,46 @@ class _MainPageState extends State<MainPage> {
                 ),
                 const SizedBox(
                   height: 20,
+                ),
+                const Divider(color: Colors.grey),
+                GestureDetector(
+                  child: const ListTile(
+                    title: Text("Fotoğraflarım",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.black)),
+                    leading: Icon(
+                      Icons.photo,
+                      color: Colors.black,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const FotograflarimPage()));
+                  },
+                ),
+                const Divider(color: Colors.grey),
+                GestureDetector(
+                  child: const ListTile(
+                    title: Text("Hesap Ayarları",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: Colors.black)),
+                    leading: Icon(
+                      Icons.settings,
+                      color: Colors.black,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HesapAyarlari()));
+                  },
                 ),
                 const Divider(color: Colors.grey),
                 GestureDetector(
