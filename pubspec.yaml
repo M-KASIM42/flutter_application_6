@@ -48,6 +48,8 @@ dependencies:
   url_launcher: ^6.1.11
   geocoding: ^3.0.0
   geolocator: ^11.0.0
+  google_maps_flutter: ^2.3.0
+
   
   
   
@@ -78,6 +80,8 @@ flutter:
   assets:
     - assets/labels.txt
     - assets/model_unquant.tflite
+    - assets/labels2.txt
+    - assets/model_unquant2.tflite
     - assets/profilfoto.png
     - assets/balik.jpg
 

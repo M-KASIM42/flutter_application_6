@@ -43,8 +43,8 @@ class _AddPageState extends State<AddPage> {
 
   loadmodel() async {
     await Tflite.loadModel(
-      model: "assets/model_unquant.tflite",
-      labels: "assets/labels.txt",
+      model: "assets/model_unquant2.tflite",
+      labels: "assets/labels2.txt",
     );
   }
 
@@ -192,7 +192,7 @@ class _AddPageState extends State<AddPage> {
             File(_image!.path),
             height: 200,
             width: 200,
-            fit: BoxFit.cover,
+            fit: BoxFit.fitHeight,
           )
         else
           Text('Fotoğraf Seçilmedi'),
@@ -303,7 +303,7 @@ class _AddPageState extends State<AddPage> {
               File(_image!.path),
               height: 200,
               width: 200,
-              fit: BoxFit.cover,
+              fit: BoxFit.fitHeight,
             )
           else
             Text('Fotoğraf seçilmedi'),
@@ -332,7 +332,7 @@ class _AddPageState extends State<AddPage> {
             File(_image!.path),
             height: 200,
             width: 200,
-            fit: BoxFit.cover,
+            fit: BoxFit.fitHeight,
           )
         else
           Text('Fotoğraf Seçilmedi'),
