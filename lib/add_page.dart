@@ -4,10 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter_application_6/my_api.dart';
-import 'package:flutter_application_6/post_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,6 +25,7 @@ class _AddPageState extends State<AddPage> {
   int degis = 0;
   TextEditingController _nerdeController = TextEditingController();
   TextEditingController _adetController = TextEditingController();
+  TextEditingController _kullaniciyorumuController = TextEditingController();
   double latidute = 0.0;
   double longitude = 0.0;
   @override
@@ -48,32 +45,31 @@ class _AddPageState extends State<AddPage> {
     );
   }
 
-  Future<Position> _determinePosition() async {
+  Future<Object> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error("Location services are disabled.");
+      return "Location services are disabled.";
     }
 
     permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          "Location permissions are permantly denied. we cannot request permissions.");
-    }
-
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        return Future.error(
-            "Location permissions are denied (actual value: $permission).");
+      if (permission == LocationPermission.denied) {
+        return "Location permissions are permantly denied.";
       }
+
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return "Location permissions are permantly denied.";
     }
 
     return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+        // desiredAccuracy: LocationAccuracy.high
+        );
   }
 
   Future<void> _pickImage() async {
@@ -223,11 +219,21 @@ class _AddPageState extends State<AddPage> {
         latidute == 0.0
             ? ElevatedButton(
                 onPressed: () async {
-                  Position position = await _determinePosition();
-                  setState(() {
-                    latidute = position.latitude;
-                    longitude = position.longitude;
-                  });
+                  Object position = await _determinePosition();
+                  if (position is Position) {
+                    setState(() {
+                      latidute = position.latitude;
+                      longitude = position.longitude;
+                    });
+                  }
+                  if (position is String) {
+                    Fluttertoast.showToast(
+                        msg: "Konum erişim izni verilmedi",
+                        toastLength: Toast.LENGTH_LONG);
+                  }
+
+
+
                 },
                 child: Text("Konum Al"))
             : Text("Konum Alındı" +
@@ -358,6 +364,17 @@ class _AddPageState extends State<AddPage> {
           ),
         ),
         Container(
+          margin: const EdgeInsets.all(20),
+          child: TextField(
+            controller: _kullaniciyorumuController,
+            decoration: InputDecoration(
+                hintText: "Yorumunuz",
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10))),
+          ),
+        ),
+        SizedBox(height: 20),
+        Container(
           width: 75,
           height: 50,
           margin: const EdgeInsets.all(20),
@@ -373,11 +390,18 @@ class _AddPageState extends State<AddPage> {
         latidute == 0.0
             ? ElevatedButton(
                 onPressed: () async {
-                  Position position = await _determinePosition();
-                  setState(() {
-                    latidute = position.latitude;
-                    longitude = position.longitude;
-                  });
+                  Object position = await _determinePosition();
+                  if (position is Position) {
+                    setState(() {
+                      latidute = position.latitude;
+                      longitude = position.longitude;
+                    });
+                  }
+                  if (position is String) {
+                    Fluttertoast.showToast(
+                        msg: "Konum erişim izni verilmedi",
+                        toastLength: Toast.LENGTH_LONG);
+                  }
                 },
                 child: Text("Konum Al"))
             : Text("Konum Alındı" +
@@ -427,15 +451,14 @@ class _AddPageState extends State<AddPage> {
               "balik_turu":
                   _recognitions[0]["label"].toString().split(' ')[1].toString(),
               "balik_tanim": _nerdeController.text,
+              "kullanici_yorumu": _kullaniciyorumuController.text,
               "begeni_sayisi": 0,
               "foto_url": FotoUrl,
               "profil_foto": profilFoto,
               "kullanici_adi": kullaniciAdi,
               "tarih": DateTime.now().microsecondsSinceEpoch,
               "nerede": point,
-              "yorumlar": [
-                {"kullanici_adi": "sami", "yorum": "sami yorum"}
-              ],
+              "yorumlar": [],
             });
             if (documentReference.id != null) {
               await FirebaseFirestore.instance
@@ -453,6 +476,7 @@ class _AddPageState extends State<AddPage> {
                 file = null;
                 _nerdeController.text = "";
                 _adetController.text = "";
+                _kullaniciyorumuController.text = "";
               });
             }
           },

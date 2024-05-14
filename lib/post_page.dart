@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_6/postlocation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -43,68 +44,114 @@ class _PostPageState extends State<PostPage> {
   }
 
   Widget _buildImageList() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  onChanged: (value) => balikAdi = value,
-                  decoration: const InputDecoration(
-                    labelText: 'Balık Türü',
-                    border: OutlineInputBorder(),
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/balik.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    style: TextStyle(color: Colors.white),
+                    onChanged: (value) => balikAdi = value,
+                    decoration: const InputDecoration(
+                        labelText: 'Balık Türü Giriniz',
+                        border: OutlineInputBorder(),
+                        enabledBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors
+                                  .white), // Focused border rengini kırmızı yapar
+                        ),
+                        labelStyle: TextStyle(color: Colors.white),
+                        hintStyle: TextStyle(color: Colors.white)),
                   ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {
-                  aranangetir(balikAdi, mekanAdi);
-                  // Arama metodu buraya gelecek
-                  // Örnek:
-                  // yönlendirmeMetodu();
-                },
-              ),
-            ],
+                IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    aranangetir(balikAdi, mekanAdi);
+                    // Arama metodu buraya gelecek
+                    // Örnek:
+                    // yönlendirmeMetodu();
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  onChanged: (value) => mekanAdi = value,
-                  decoration: const InputDecoration(
-                    labelText: 'Mekan Ara',
-                    border: OutlineInputBorder(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    style: TextStyle(color: Colors.white),
+                    onChanged: (value) => mekanAdi = value,
+                    decoration: const InputDecoration(
+                      labelText: 'Mekan Ara',
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.white,
+                        ),
+                      ),
+                      enabledBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors
+                                .white), // Focused border rengini kırmızı yapar
+                      ),
+                      labelStyle: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {
-                  aranangetir(balikAdi, mekanAdi);
-                  // Arama metodu buraya gelecek
-                  // Örnek:
-                  // yönlendirmeMetodu();
-                },
-              ),
-            ],
+                IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    aranangetir(balikAdi, mekanAdi);
+                    // Arama metodu buraya gelecek
+                    // Örnek:
+                    // yönlendirmeMetodu();
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: _images.length,
-            itemBuilder: (context, index) {
-              return _buildPostCard(_images[index]);
-            },
+          Expanded(
+            child: ListView.builder(
+              itemCount: _images.length,
+              itemBuilder: (context, index) {
+                return _buildPostCard(_images[index]);
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  String zamanFarkiHesapla(int microsecondsSinceEpoch) {
+    DateTime gecenZaman =
+        DateTime.fromMicrosecondsSinceEpoch(microsecondsSinceEpoch);
+    Duration fark = DateTime.now().difference(gecenZaman);
+
+    if (fark.inDays > 0) {
+      return '${fark.inDays} gün önce';
+    } else if (fark.inHours > 0) {
+      return '${fark.inHours} saat önce';
+    } else if (fark.inMinutes > 0) {
+      return '${fark.inMinutes} dakika önce';
+    } else {
+      return '${fark.inSeconds} saniye önce';
+    }
   }
 
   Widget _buildPostCard(Map<String, dynamic> imageData) {
@@ -118,7 +165,13 @@ class _PostPageState extends State<PostPage> {
               backgroundImage: NetworkImage(imageData['profil_foto']),
             ),
             title: const Text('Kullanıcı Adı'),
-            subtitle: Text(imageData['kullanici_adi'].toString()),
+            subtitle: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(imageData['kullanici_adi'].toString()),
+                Text(zamanFarkiHesapla(imageData['tarih']))
+              ],
+            ),
           ),
           CachedNetworkImage(
             imageUrl: imageData['foto_url'],
@@ -212,20 +265,55 @@ class _PostPageState extends State<PostPage> {
                                 style: Theme.of(context).textTheme.headline6,
                               ),
                               const SizedBox(height: 16.0),
-                              for (var yorum in imageData["yorumlar"])
-                                Row(
-                                  children: [
-                                    Text(yorum["kullanici_adi"]),
-                                    Text(yorum["yorum"]),
-                                  ],
-                                ),
+                              imageData["yorumlar"].isEmpty
+                                  ? Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0),
+                                      child: Text(
+                                        "Bu fotoğrafa yorum yazan ilk kişi siz olun",
+                                        style: TextStyle(
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: imageData["yorumlar"].length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        var yorum =
+                                            imageData["yorumlar"][index];
+                                        return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8.0),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                yorum["kullanici_adi"] + ":",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20),
+                                              ),
+                                              const SizedBox(width: 8.0),
+                                              Text(
+                                                yorum["yorum"],
+                                                style: TextStyle(fontSize: 20),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                              const SizedBox(height: 16.0),
                               TextField(
-                                  controller: _yorumController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Yorumunuzu girin',
-                                  )),
-                              ElevatedButton(
-                                  onPressed: () async {
+                                controller: _yorumController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Yorumunuzu girin',
+                                ),
+                              ),
+                              const SizedBox(height: 16.0),
+                              GestureDetector(
+                                  onTap: () async {
                                     String kulAdi = FirebaseFirestore.instance
                                         .collection("users")
                                         .doc(FirebaseAuth
@@ -256,7 +344,16 @@ class _PostPageState extends State<PostPage> {
                                     });
                                     Navigator.pop(context);
                                   },
-                                  child: Center(child: Text("Yorum Yap")))
+                                  child: Center(
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      color: Colors.deepPurpleAccent,
+                                      child: Text(
+                                        'Yorum Yap',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  )),
                             ],
                           ),
                         );
@@ -272,28 +369,52 @@ class _PostPageState extends State<PostPage> {
                 onPressed: () async {
                   // Konum butonu işlevselliği
                   GeoPoint point = imageData["nerede"];
+                  int balik_adet = imageData["balik_adet"];
+                  String balik_turu = imageData["balik_turu"];
                   double latitude = point.latitude;
                   double longitude = point.longitude;
 
                   // Konumun adını al
-                  String locationName =
-                      await _getLocationName(latitude, longitude);
+                  // String locationName =
+                  //     await _getLocationName(latitude, longitude);
 
                   // Google Maps URL oluştur
-                  final String googleMapsUrl =
-                      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+                  // final String googleMapsUrl =
+                  //     'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
 
-                  // Google Maps uygulamasını aç
-                  if (await canLaunch(googleMapsUrl)) {
-                    await launch(googleMapsUrl);
-                  } else {
-                    throw 'Google Maps uygulaması açılamadı.';
-                  }
+                  // // Google Maps uygulamasını aç
+                  // if (await canLaunch(googleMapsUrl)) {
+                  //   await launch(googleMapsUrl);
+                  // } else {
+                  //   throw 'Google Maps uygulaması açılamadı.';
+                  // }
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return PostLocation(
+                      latitude: latitude,
+                      longitude: longitude,
+                      balik_adet: balik_adet,
+                      balik_turu: balik_turu,
+                    );
+                  }));
                 },
                 icon: Icon(Icons.location_on),
               ),
             ],
           ),
+          imageData["kullanici_yorumu"] == ""
+              ? Container(
+                  child: Text("Kullanıcı yorum yapmamış"),
+                )
+              : Column(
+                  children: [
+                    Text(
+                      "Kullanıcı Yorumu:",
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    ListTile(title: Text(imageData["kullanici_yorumu"])),
+                  ],
+                )
         ],
       ),
     );
@@ -354,7 +475,9 @@ class _PostPageState extends State<PostPage> {
             'balik_turu': balikturu,
             'balik_tanim': balik_tanim,
             'nerede': nerde,
+            'kullanici_yorumu': imageDoc["kullanici_yorumu"] ?? "Yorum Yok",
             'id': id,
+            'balik_adet': imageDoc["balik_adet"],
             "yorumlar": imageDoc["yorumlar"] ?? "Yorum Yok"
           });
           aramaimages.add({
@@ -364,9 +487,11 @@ class _PostPageState extends State<PostPage> {
             'tarih': date,
             'kullanici_adi': kullanici_adi,
             'balik_turu': balikturu,
+            'kullanici_yorumu': imageDoc["kullanici_yorumu"] ?? "Yorum Yok",
             'balik_tanim': balik_tanim,
             'nerede': nerde,
             'id': id,
+            'balik_adet': imageDoc["balik_adet"],
             "yorumlar": imageDoc["yorumlar"] ?? "Yorum Yok"
           });
         }
@@ -421,7 +546,6 @@ class _PostPageState extends State<PostPage> {
   }
 
   void aranangetir(String balikAdi, String mekanadi) {
-
     if (mekanAdi != "" && balikAdi != "") {
       _images = aramaimages;
       List<Map<String, dynamic>> _images2 = [];
@@ -434,13 +558,11 @@ class _PostPageState extends State<PostPage> {
       setState(() {
         _images = _images2;
       });
-    }
-    else if(mekanAdi =="" && balikAdi==""){
+    } else if (mekanAdi == "" && balikAdi == "") {
       setState(() {
         _images = aramaimages;
       });
-    }
-    else if (mekanAdi != "" && balikAdi == "") {
+    } else if (mekanAdi != "" && balikAdi == "") {
       _images = aramaimages;
       List<Map<String, dynamic>> _images2 = [];
       for (var i = 0; i < _images.length; i++) {
@@ -451,8 +573,7 @@ class _PostPageState extends State<PostPage> {
       setState(() {
         _images = _images2;
       });
-    }
-    else if (balikAdi != "" && mekanAdi == "") {
+    } else if (balikAdi != "" && mekanAdi == "") {
       _images = aramaimages;
       List<Map<String, dynamic>> _images2 = [];
       for (var i = 0; i < _images.length; i++) {
@@ -463,8 +584,7 @@ class _PostPageState extends State<PostPage> {
       setState(() {
         _images = _images2;
       });
-    }
-    else {
+    } else {
       _images = aramaimages;
     }
   }

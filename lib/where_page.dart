@@ -49,6 +49,7 @@ class _WherePageState extends State<WherePage> {
           GeoPoint location = imageDoc['nerede'];
           int date = imageDoc['tarih'];
           String balikturu = imageDoc["balik_turu"];
+          int balikadet = imageDoc["balik_adet"];
           // Extract latitude and longitude
           double latitude = location.latitude;
           double longitude = location.longitude;
@@ -59,7 +60,14 @@ class _WherePageState extends State<WherePage> {
             Marker(
               markerId: MarkerId(date.toString()),
               position: LatLng(latitude, longitude),
-              infoWindow: InfoWindow(title: balikturu),
+              infoWindow: InfoWindow(
+                  title: balikturu,
+                  snippet: balikadet.toString() + ' adet',
+
+      
+                  
+                  ),
+                
             ),
           );
         }
