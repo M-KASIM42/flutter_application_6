@@ -3,8 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_6/postlocation.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:geocoding/geocoding.dart';
 
 class PostPage extends StatefulWidget {
   const PostPage({Key? key}) : super(key: key);
@@ -373,27 +371,12 @@ class _PostPageState extends State<PostPage> {
                   String balik_turu = imageData["balik_turu"];
                   double latitude = point.latitude;
                   double longitude = point.longitude;
-
-                  // Konumun adını al
-                  // String locationName =
-                  //     await _getLocationName(latitude, longitude);
-
-                  // Google Maps URL oluştur
-                  // final String googleMapsUrl =
-                  //     'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
-
-                  // // Google Maps uygulamasını aç
-                  // if (await canLaunch(googleMapsUrl)) {
-                  //   await launch(googleMapsUrl);
-                  // } else {
-                  //   throw 'Google Maps uygulaması açılamadı.';
-                  // }
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return PostLocation(
                       latitude: latitude,
                       longitude: longitude,
-                      balik_adet: balik_adet,
-                      balik_turu: balik_turu,
+                      balikAdet: balik_adet,
+                      balikTuru: balik_turu,
                     );
                   }));
                 },
@@ -420,20 +403,6 @@ class _PostPageState extends State<PostPage> {
     );
   }
 
-  Future<String> _getLocationName(double latitude, double longitude) async {
-    try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(latitude, longitude);
-      if (placemarks.isNotEmpty) {
-        return placemarks[0].name ?? 'Belirsiz';
-      } else {
-        return 'Belirsiz';
-      }
-    } catch (e) {
-      print('Hata: $e');
-      return 'Belirsiz';
-    }
-  }
 
   Future<void> _getImages() async {
     try {

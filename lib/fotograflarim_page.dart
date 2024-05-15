@@ -46,7 +46,7 @@ class _FotograflarimPageState extends State<FotograflarimPage> {
       // Kullanıcıya başarıyla silindiğine dair bilgi ver
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Fotoğraf başarıyla silindi.'),
+          content:  Text('Fotoğraf başarıyla silindi.'),
           backgroundColor: Colors.green,
         ),
       );
@@ -69,14 +69,14 @@ class _FotograflarimPageState extends State<FotograflarimPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Fotoğrafı Sil"),
-          content: Text("Seçili fotoğrafı silmek istediğinize emin misiniz?"),
+          title: const Text("Fotoğrafı Sil"),
+          content: const Text("Seçili fotoğrafı silmek istediğinize emin misiniz?"),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // İptal et
               },
-              child: Text("İptal"),
+              child: const Text("İptal"),
             ),
             TextButton(
               onPressed: () {
@@ -84,7 +84,7 @@ class _FotograflarimPageState extends State<FotograflarimPage> {
                 // Fotoğrafı silme fonksiyonunu çağır
                 deletePhoto(photoId);
               },
-              child: Text("Evet, Sil"),
+              child: const Text("Evet, Sil"),
             ),
           ],
         );
@@ -103,10 +103,10 @@ class _FotograflarimPageState extends State<FotograflarimPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Fotograflarim'),
+        title: const Text('Fotograflarim'),
       ),
       body: userPhotos.isEmpty
-          ? Center(
+          ? const Center(
               child: Text('Henüz fotoğrafınız yok.'),
             )
           : ListView.builder(
@@ -126,7 +126,7 @@ class _FotograflarimPageState extends State<FotograflarimPage> {
                           // Silme işlemini onaylamak için iletişim kutusunu göster
                           _showDeleteConfirmationDialog(userPhotos[index].id);
                         },
-                        child: Text('Sil'),
+                        child: const Text('Sil'),
                       ),
                     ],
                   ),

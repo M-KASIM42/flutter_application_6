@@ -1,24 +1,29 @@
-class MyApi{
+class MyApi {
   static String userName = "";
   static String email = "";
   static String profilfoto = "";
 
-  static String getUser(){
+  static String getUser() {
     return userName;
   }
-  static void setUser(String userName){
+
+  static void setUser(String userName) {
     userName = userName;
   }
-  static String getEmail(){
+
+  static String getEmail() {
     return email;
   }
-  static void setEmail(String email){
+
+  static void setEmail(String email) {
     email = email;
   }
-  static String getProfilFoto(){
+
+  static String getProfilFoto() {
     return profilfoto;
   }
-  static void setProfilFoto(String profilfoto){
+
+  static void setProfilFoto(String profilfoto) {
     profilfoto = profilfoto;
   }
 }

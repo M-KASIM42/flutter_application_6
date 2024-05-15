@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_6/main.dart';
 import 'package:flutter_application_6/register_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'forgot_password.dart';
 
 class LoginPage extends StatefulWidget {

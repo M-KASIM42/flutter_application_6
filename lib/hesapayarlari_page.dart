@@ -9,14 +9,14 @@ class HesapAyarlari extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hesap Ayarları'),
+        title: const Text('Hesap Ayarları'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Kişisel Bilgiler',
               style: TextStyle(
                 fontSize: 20,
@@ -24,17 +24,17 @@ class HesapAyarlari extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Profil Düzenle'),
+              leading: const Icon(Icons.person),
+              title: const Text('Profil Görüntüle'),
               onTap: () {
                 Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const ProfilePage()));
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfilePage()));
               },
             ),
-            Divider(),
-            Text(
+            const Divider(),
+            const Text(
               'Güvenlik',
               style: TextStyle(
                 fontSize: 20,
@@ -42,18 +42,19 @@ class HesapAyarlari extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.lock),
-              title: Text('Şifre Değiştir'),
+              leading: const Icon(Icons.lock),
+              title: const Text('Şifre Değiştir'),
               onTap: () async {
                 try {
                   await FirebaseAuth.instance.sendPasswordResetEmail(
                       email: FirebaseAuth.instance.currentUser!.email!);
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                   // ignore: use_build_context_synchronously
                   showDialog(
                       context: context,
                       builder: (context) {
-                        return AlertDialog(
+                        return const AlertDialog(
                           content: Text(
                               "Sıfırlama linki mail adresinize gönderilidi"),
                         );
@@ -69,8 +70,8 @@ class HesapAyarlari extends StatelessWidget {
                 }
               },
             ),
-            Divider(),
-            Text(
+            const Divider(),
+            const Text(
               'Diğer',
               style: TextStyle(
                 fontSize: 20,
@@ -78,8 +79,8 @@ class HesapAyarlari extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.language),
-              title: Text('Dil Seç'),
+              leading: const Icon(Icons.language),
+              title: const Text('Dil Seç'),
               onTap: () {
                 // Dil seçme ekranına gitmek için navigator kullanabilirsiniz.
               },

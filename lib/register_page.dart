@@ -17,25 +17,38 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _rePasswordController = TextEditingController();
   final _userNameController = TextEditingController();
+  List<String> userList = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setUserList();
+  }
+  setUserList()async{
+    userList = await getFirebaseUsernames();
+    setState(() {
+      
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage("assets/balik.jpg"), fit: BoxFit.cover)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               "BALIK",
               style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
                   color: Colors.white),
             ),
-            Text(
+            const Text(
               "DÜNYASI",
               style: TextStyle(
                   fontSize: 40,
@@ -131,11 +144,15 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             GestureDetector(
               onTap: () async {
+
                 String email = _emailController.text.trim();
                 String password = _passwordController.text.trim();
                 String rePassword = _rePasswordController.text.trim();
                 String userName = _userNameController.text.trim();
-
+                if (userList.contains(userName)) {
+                  showToastMessage("Bu kullanıcı adı alınmıştır. Lütfen başka bir kullanıcı adı seçin.");
+                  return;
+                }
                 if (password == rePassword) {
                   try {
                     await FirebaseAuth.instance
@@ -173,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text("Hata"),
+                          title: const Text("Hata"),
                           content: Text(error.toString()),
                         );
                       },
@@ -188,7 +205,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 width: 340,
                 height: 50,
-                child: Center(
+                child: const Center(
                   child: Text(
                     "Kayıt Ol",
                     style: TextStyle(
@@ -205,6 +222,29 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
+
+Future<List<String>> getFirebaseUsernames() async {
+  List<String> usernames = [];
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('users').get();
+    
+    querySnapshot.docs.forEach((doc) {
+      if (doc.exists) {
+        var data = doc.data() as Map<String, dynamic>; // Firestore verilerini belirli bir tipe dönüştürme
+        if (data.containsKey('userName')) {
+          usernames.add(data['userName'] as String); // Dize dönüşümü
+        }
+      }
+    });
+  } catch (e) {
+    print('Error getting usernames: $e');
+    // Hata durumunda boş bir liste döndürebilirsiniz veya hata yönetimini başka bir şekilde yapabilirsiniz.
+  }
+
+  return usernames;
+}
+
 
   void showToastMessage(String message) {
     Fluttertoast.showToast(

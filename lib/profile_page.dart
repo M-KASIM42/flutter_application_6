@@ -1,11 +1,8 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -93,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      final _picker = await ImagePicker()
+                      final picker = await ImagePicker()
                           .pickImage(source: ImageSource.gallery);
                       String fileName =
                           "${FirebaseAuth.instance.currentUser!.uid}.jpg";
@@ -102,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           .child("profilfoto")
                           .child(fileName);
                       try {
-                        await ref.putFile(File(_picker!.path));
+                        await ref.putFile(File(picker!.path));
                       } catch (e) {
                         debugPrint("Hata: $e");
                       }
@@ -155,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     "Kullanıcı Adı",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
                   Text(

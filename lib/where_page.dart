@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,6 +15,7 @@ class _WherePageState extends State<WherePage> {
       CameraPosition(target: LatLng(41.5077902, 36.1142925), zoom: 14);
   final Completer<GoogleMapController> _controller = Completer();
   final List<Marker> myMarker = [];
+  final List<Circle> myCircle = [];
   @override
   void initState() {
     super.initState();
@@ -31,6 +31,7 @@ class _WherePageState extends State<WherePage> {
         _controller.complete(controller);
       },
       markers: Set<Marker>.of(myMarker),
+      circles: Set<Circle>.of(myCircle),
     );
   }
 
@@ -56,18 +57,23 @@ class _WherePageState extends State<WherePage> {
           debugPrint('Latitude: $latitude, Longitude: $longitude');
 
           // Create a marker for the location
+          myCircle.add(
+            Circle(
+              circleId: CircleId(date.toString()),
+              center: LatLng(latitude, longitude),
+              radius: balikadet.toDouble() * 5,
+              fillColor: Colors.blue.withOpacity(0.5),
+              strokeWidth: 0,
+            ),
+          );
           myMarker.add(
             Marker(
               markerId: MarkerId(date.toString()),
               position: LatLng(latitude, longitude),
               infoWindow: InfoWindow(
-                  title: balikturu,
-                  snippet: balikadet.toString() + ' adet',
-
-      
-                  
-                  ),
-                
+                title: balikturu,
+                snippet: '$balikadet adet',
+              ),
             ),
           );
         }
