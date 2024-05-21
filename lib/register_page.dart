@@ -49,7 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   color: Colors.white),
             ),
             const Text(
-              "DÜNYASI",
+              "REHBERİ",
               style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.normal,

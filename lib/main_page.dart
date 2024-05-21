@@ -102,7 +102,7 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
         appBar: AppBar(
-          title: const Text('MOBİLE APPLİCATİON'),
+          title: const Text('BALIK REHBERİ'),
           centerTitle: true,
           backgroundColor: Colors.deepPurpleAccent,
         ),

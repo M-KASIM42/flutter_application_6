@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 10,
               ),
               Text(
-                "DÜNYASI",
+                "REHBERİ",
                 style: TextStyle(
                   color: Colors.deepOrangeAccent[200],
                   fontSize: 40,

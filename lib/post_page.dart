@@ -391,7 +391,7 @@ class _PostPageState extends State<PostPage> {
               : Column(
                   children: [
                     Text(
-                      "Kullanıcı Yorumu:",
+                      "Kullanıcı Yorumu",
                       style:
                           TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                     ),

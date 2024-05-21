@@ -15,24 +15,12 @@ class _WherePageState extends State<WherePage> {
       CameraPosition(target: LatLng(41.5077902, 36.1142925), zoom: 14);
   final Completer<GoogleMapController> _controller = Completer();
   final List<Marker> myMarker = [];
-  final List<Circle> myCircle = [];
+  String selectedFishType = "";
+
   @override
   void initState() {
     super.initState();
     _getLocations();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GoogleMap(
-      mapType: MapType.satellite,
-      initialCameraPosition: _initialPosition,
-      onMapCreated: (GoogleMapController controller) {
-        _controller.complete(controller);
-      },
-      markers: Set<Marker>.of(myMarker),
-      circles: Set<Circle>.of(myCircle),
-    );
   }
 
   Future<void> _getLocations() async {
@@ -51,37 +39,89 @@ class _WherePageState extends State<WherePage> {
           int date = imageDoc['tarih'];
           String balikturu = imageDoc["balik_turu"];
           int balikadet = imageDoc["balik_adet"];
+
           // Extract latitude and longitude
           double latitude = location.latitude;
           double longitude = location.longitude;
-          debugPrint('Latitude: $latitude, Longitude: $longitude');
 
-          // Create a marker for the location
-          myCircle.add(
-            Circle(
-              circleId: CircleId(date.toString()),
-              center: LatLng(latitude, longitude),
-              radius: balikadet.toDouble() * 5,
-              fillColor: Colors.blue.withOpacity(0.5),
-              strokeWidth: 0,
-            ),
-          );
-          myMarker.add(
-            Marker(
-              markerId: MarkerId(date.toString()),
-              position: LatLng(latitude, longitude),
-              infoWindow: InfoWindow(
-                title: balikturu,
-                snippet: '$balikadet adet',
+          // Create a marker for the location if the fish type matches
+          if (selectedFishType.isEmpty || balikturu == selectedFishType) {
+            myMarker.add(
+              Marker(
+                markerId: MarkerId(date.toString()),
+                position: LatLng(latitude, longitude),
+                infoWindow: InfoWindow(
+                  title: balikturu,
+                  snippet: '$balikadet adet',
+                ),
               ),
-            ),
-          );
+            );
+          }
         }
       }
-      // After adding all markers, update the state to trigger a rebuild
       setState(() {});
     } catch (e) {
       print('Error: $e');
     }
+  }
+
+  void _onFishTypeChanged(String? newType) {
+    setState(() {
+      selectedFishType = newType ?? "";
+      myMarker.clear(); // Clear existing markers
+      _getLocations(); // Fetch locations again with the new filter
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: DropdownButton<String>(
+            value: selectedFishType.isEmpty ? null : selectedFishType,
+            hint: Text("Balık türü seçin"),
+            items: <String>[
+              'alabalik',
+              'aslanbaligi',
+              'balonbaligi',
+              'barbun',
+              'cipura',
+              'hamsi',
+              'iskorpit',
+              'istavrit',
+              'kalkan',
+              'karides',
+              'kefal',
+              'levrek',
+              'lufer',
+              'palamut',
+              'rina',
+              'sazan',
+              'tekir',
+              'vatoz'
+            ] // Example fish types
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: _onFishTypeChanged,
+          ),
+        ),
+        Expanded(
+          child: GoogleMap(
+            mapType: MapType.satellite,
+            initialCameraPosition: _initialPosition,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
+            markers: Set<Marker>.of(myMarker),
+          ),
+        ),
+      ],
+    );
   }
 }

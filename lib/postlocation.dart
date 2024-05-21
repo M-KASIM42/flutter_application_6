@@ -7,7 +7,13 @@ class PostLocation extends StatefulWidget {
   final double longitude;
   final int balikAdet;
   final String balikTuru;
-  const PostLocation({Key? key, required this.latitude, required this.longitude,required this.balikAdet,required this.balikTuru}) : super(key: key);
+  const PostLocation(
+      {Key? key,
+      required this.latitude,
+      required this.longitude,
+      required this.balikAdet,
+      required this.balikTuru})
+      : super(key: key);
 
   @override
   State<PostLocation> createState() => _PostLocationState();
@@ -28,26 +34,23 @@ class _PostLocationState extends State<PostLocation> {
     longi = widget.longitude;
     balikAdet = widget.balikAdet;
     balikTuru = widget.balikTuru;
-    myMarker.add(Marker(markerId: const MarkerId('1'), position: LatLng(lati, longi), infoWindow: InfoWindow(title: balikTuru, snippet: '$balikAdet adet')));
+    myMarker.add(Marker(
+        markerId: const MarkerId('1'),
+        position: LatLng(lati, longi),
+        infoWindow: InfoWindow(title: balikTuru, snippet: '$balikAdet adet')));
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GoogleMap(initialCameraPosition: CameraPosition(target: LatLng(lati, longi), zoom: 14
-      ), onMapCreated: (GoogleMapController controller) {
+        body: GoogleMap(
+      initialCameraPosition:
+          CameraPosition(target: LatLng(lati, longi), zoom: 14),
+      onMapCreated: (GoogleMapController controller) {
         _controller.complete(controller);
       },
       mapType: MapType.satellite,
       markers: Set<Marker>.of(myMarker),
-      circles: Set<Circle>.of([
-        Circle(
-              circleId: CircleId("1"),
-              center: LatLng(lati, longi),
-              radius: balikAdet.toDouble() * 5,
-              fillColor: Colors.blue.withOpacity(0.5),
-              strokeWidth: 0,
-            ),
-      ]),
     ));
   }
 }
